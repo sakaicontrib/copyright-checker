@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.sakaiproject.s2u.copyright.model" default-lazy="false">
+
+    <class name="org.sakaiproject.s2u.copyright.model.IntellectualPropertyFile" table="CC_FILE">
+        <id name="id" column="ID" type="java.lang.Long" unsaved-value="0">
+            <generator class="native">
+                <param name="sequence">CC_FILE_S</param>
+            </generator>
+        </id>
+
+        <property name="fileId" type="string" length="255" column="FILE_ID" not-null="true" />
+        <property name="context" type="string" length="255" column="CONTEXT" not-null="true" />
+        <property name="userId" type="string" length="255" column="USER_ID" not-null="true" />
+        <property name="property" type="java.lang.Integer" column="PROPERTY" not-null="true" />
+        <property name="type" type="java.lang.Integer" column="TYPE" not-null="false" />
+        <property name="author" type="string" length="255" column="AUTHOR" not-null="false" />
+        <property name="license" type="string" length="255" column="LICENSE" not-null="false" />
+        <property name="title" type="string" length="255" column="TITLE" not-null="false" />
+        <property name="identification" type="string" length="255" column="IDENTIFICATION" not-null="false" />
+        <property name="state" type="java.lang.Integer" column="STATE" not-null="true" />
+        <property name="created" type="timestamp" column="CREATED" not-null="true" />
+        <property name="modified" type="timestamp" column="MODIFIED" not-null="true" />
+        <property name="publisher" type="string" length="255" column="PUBLISHER" not-null="false" />
+        <property name="pages" type="string" length="255" column="PAGES" not-null="false" />
+        <property name="totalPages" type="string" column="TOTAL_PAGES" not-null="false" />
+        <property name="rightsEntity" type="string" length="255" column="RIGHTS_ENTITY" not-null="false" />
+        <property name="licenseEndTime" type="timestamp" column="LICENSE_END_TIME" not-null="false" />
+        <property name="perpetual" type="java.lang.Boolean" column="PERPETUAL" not-null="false" />
+        <property name="comments" type="text" column="COMMENTS" not-null="false" />
+        <property name="denyReason" type="string" length="400" column="DENY_REASON" not-null="false" />
+        <property name="enrollments" type="java.lang.Integer" column="ENROLLMENTS" not-null="false" />
+        <property name="lastDoubtTime" type="timestamp" column="LAST_DOUBT_TIME" not-null="false" />
+
+        <set name="doubts" lazy="true" cascade="all,delete-orphan" fetch="join" order-by="created desc" inverse="false">
+            <key column="CC_FILE_ID" />
+            <one-to-many class="org.sakaiproject.s2u.copyright.model.IntellectualPropertyFileDoubt" />
+        </set>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.sakaiproject.s2u.copyright.model" default-lazy="false">
+
+    <class name="org.sakaiproject.s2u.copyright.model.IntellectualPropertyFileDoubt" table="CC_FILE_DOUBT">
+        <id name="id" column="ID" type="java.lang.Long" unsaved-value="0">
+            <generator class="native">
+                <param name="sequence">CC_FILE_DOUBT_S</param>
+            </generator>
+        </id>
+
+        <property name="userId" type="string" length="255" column="USER_ID" not-null="true" />
+        <property name="created" type="date" column="CREATED" not-null="false" />
+        <property name="sent" type="date" column="SENT" not-null="false" />
+        <property name="message" type="text" column="MESSAGE" not-null="false" />
+        <property name="messageFormat" type="int" column="MESSAGE_FORMAT" not-null="false" />
+
+        <many-to-one name="file"
+            class="org.sakaiproject.s2u.copyright.model.IntellectualPropertyFile"
+            column="CC_FILE_ID">
+        </many-to-one>
+    </class>
+</hibernate-mapping>

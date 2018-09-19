@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <!--  SakaiProxy -->
+    <bean id="org.sakaiproject.s2u.copyright.logic.SakaiProxy"
+        class="org.sakaiproject.s2u.copyright.logic.SakaiProxyImpl"
+        init-method="init">
+        <!-- API injection -->
+        <property name="cache" ref="org.sakaiproject.s2u.copyright.cache" />
+        <property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService" />
+        <property name="emailService" ref="org.sakaiproject.email.api.EmailService" />
+        <property name="eventTrackingService" ref="org.sakaiproject.event.api.EventTrackingService" />
+        <property name="securityService" ref="org.sakaiproject.authz.api.SecurityService" />
+        <property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+        <property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+        <property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+        <property name="threadLocalManager" ref="org.sakaiproject.thread_local.api.ThreadLocalManager" />
+        <property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+        <property name="PASystem" ref="org.sakaiproject.pasystem.api.PASystem" />
+    </bean>
+
+    <bean id="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappingsImpl.copyright"
+        class="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappingsImpl">
+        <property name="mappingResources">
+            <list>
+                <value>
+                    org/sakaiproject/s2u/copyright/model/IntellectualPropertyFile.hbm.xml
+                </value>
+                <value>
+                    org/sakaiproject/s2u/copyright/model/IntellectualPropertyFileDoubt.hbm.xml
+                </value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="org.sakaiproject.s2u.copyright.dao.CopyrightCheckerDao" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager" />
+        </property>
+        <property name="target">
+            <bean class="org.sakaiproject.s2u.copyright.dao.impl.CopyrightCheckerDaoImpl">
+                <property name="sessionFactory">
+                    <ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory" />
+                </property>
+            </bean>
+        </property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- CopyrightCheckerService -->
+    <bean id="org.sakaiproject.s2u.copyright.logic.CopyrightCheckerService"
+        class="org.sakaiproject.s2u.copyright.logic.CopyrightCheckerServiceImpl"
+        init-method="init">
+        <property name="dao" ref="org.sakaiproject.s2u.copyright.dao.CopyrightCheckerDao" />
+        <property name="cache" ref="org.sakaiproject.s2u.copyright.cache" />
+    </bean>
+
+    <!-- Cache: ttl=1 hour -->
+    <bean id="org.sakaiproject.s2u.copyright.cache"
+        class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheManager">
+            <ref bean="org.sakaiproject.memory.api.MemoryService.cacheManager"/>
+        </property>
+        <property name="cacheName">
+            <value>org.sakaiproject.s2u.copyright.cache</value>
+        </property>
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="diskPersistent" value="false" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="3600" />
+        <property name="timeToIdle" value="3600" />
+    </bean>
+
+    <bean id="org.sakaiproject.s2u.copyright.logic.EventProcessorLogic" class="org.sakaiproject.s2u.copyright.logic.EventProcessorLogicImpl"
+        init-method="init" destroy-method="destroy">
+        <property name="sakaiProxy" ref="org.sakaiproject.s2u.copyright.logic.SakaiProxy"></property>
+        <property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager"></property>
+    </bean>
+
+    <bean
+        id="org.sakaiproject.s2u.copyright.listener.ContentEventProcessor"
+        class="org.sakaiproject.s2u.copyright.listener.ContentEventProcessor"
+        init-method="init">
+        <property name="eventProcessorLogic" ref="org.sakaiproject.s2u.copyright.logic.EventProcessorLogic"></property>
+        <property name="sakaiProxy" ref="org.sakaiproject.s2u.copyright.logic.SakaiProxy"></property>
+        <property name="copyrightCheckerService" ref="org.sakaiproject.s2u.copyright.logic.CopyrightCheckerService"></property>
+    </bean>
+
+    <bean id="org.sakaiproject.s2u.copyright.job.ContentEventProcessorJob"
+        class="org.sakaiproject.s2u.copyright.job.ContentEventProcessorJob">
+        <property name="sakaiProxy" ref="org.sakaiproject.s2u.copyright.logic.SakaiProxy"></property>
+        <property name="copyrightCheckerService" ref="org.sakaiproject.s2u.copyright.logic.CopyrightCheckerService"></property>
+    </bean>
+
+    <bean id="org.sakaiproject.api.app.scheduler.JobBeanWrapper.org.sakaiproject.s2u.copyright.job.ContentEventProcessorJob"
+        class="org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper"
+        init-method="init">
+        <property name="beanId">
+            <value>org.sakaiproject.s2u.copyright.job.ContentEventProcessorJob</value>
+        </property>
+        <property name="jobName">
+            <value>Copyright Checker - Hide files which intellectual property has not been declared.</value>
+        </property>
+        <property name="schedulerManager">
+            <ref bean="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+        </property>
+    </bean>
+</beans>

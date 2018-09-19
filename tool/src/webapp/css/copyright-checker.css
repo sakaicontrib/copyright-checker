@@ -1,0 +1,299 @@
+@charset "UTF-8";
+.Mrphs-sakai-copyright-checker .rowsNumberDropdown {
+  margin-right: 5px;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList tr td {
+  vertical-align: middle;
+  table-layout: fixed;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList .col-visibility {
+  text-align: center;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList .col-actions {
+  text-align: center;
+  width: 15%;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList td.col-actions {
+  padding: 0px;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList .wicket_orderNone > a > span::after {
+  content: "\f0dc";
+  font-family: FontAwesome;
+  padding-left: 5px;
+  position: absolute;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList .wicket_orderDown > a > span::after {
+  content: "\f0dd";
+  font-family: FontAwesome;
+  padding-left: 5px;
+  position: absolute;
+}
+.Mrphs-sakai-copyright-checker table.table-striped.table-hover.dataview.resourcesList .wicket_orderUp > a > span::after {
+  content: "\f0de";
+  font-family: FontAwesome;
+  padding-left: 5px;
+  position: absolute;
+}
+.Mrphs-sakai-copyright-checker .messageSuccess > ul {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+.Mrphs-sakai-copyright-checker .page-header {
+  margin-top: 0;
+}
+
+html body .featherlight.lpiResourceModal {
+  z-index: 20;
+}
+html body .featherlight.lpiResourceModal .featherlight-content {
+  padding: 0px;
+  background: transparent;
+  max-height: 1500px;
+  height: calc(100% - 40px);
+  border-bottom: 0;
+  margin: 20px 5%;
+  min-width: 90%;
+  max-width: 90%;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner {
+  height: 100%;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-heading .processingState {
+  float: right;
+  margin-right: 40px;
+}
+@media only screen and (max-width: 800px) {
+  html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-heading .processingState {
+    float: initial;
+    display: block;
+    margin-right: 5px;
+    margin-top: 10px;
+  }
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  padding: 0px;
+  height: -moz-available;
+  height: -webkit-fill-available;
+  height: fill-available;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft {
+  padding: 0px;
+  height: 100%;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .notSupported {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 100%;
+  border-right: 5px solid silver;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .notSupported .downloadFileCentered {
+  margin-top: auto;
+  margin-bottom: auto;
+  width: 75%;
+  border: 5px solid silver;
+  padding: 35px 10px;
+  border-radius: 15px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .notSupported .downloadFileCentered img {
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #59abff;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .notSupported .downloadFileCentered h5 {
+  margin: 35px 10px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .notSupported .downloadFileCentered button {
+  margin: auto;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .plainPreview {
+  border-right: 5px solid silver;
+  height: 100%;
+  padding: 15px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft .plainPreview .previewHtml {
+  background-color: oldlace;
+  height: 100%;
+  padding: 10px;
+  overflow-y: overlay;
+  overflow-wrap: break-word;
+  white-space: pre;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight {
+  background-color: white;
+  overflow-y: auto;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .file-info-header {
+  padding: 0;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .file-info-header .file-text-header {
+  padding: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .file-info-header .file-text-header:last-of-type {
+  display: -webkit-flex;
+  display: flex;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .file-info-header .file-text-header:last-of-type label {
+  margin-right: 5px;
+}
+@media only screen and (min-width: 991px) {
+  html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .file-info-header .ml-auto {
+    margin-left: auto;
+  }
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .alertMessage {
+  margin-top: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .alertMessage .feedbackPanel {
+  margin-bottom: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer {
+  position: relative;
+  display: inline;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .inlineDateContainer {
+  display: -webkit-flex;
+  display: flex;
+  margin-bottom: 15px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .inlineDateContainer .perpetualCheckbox {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+  padding-top: 5px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 3px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .inlineDateContainer .perpetualCheckbox label input {
+  margin-left: 5px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .datePickerIcon {
+  position: relative;
+  display: inline-block;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .datePickerIcon::after {
+  content: "";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  margin: 0px 0px 0px 5px;
+  text-decoration: none;
+  right: 4px;
+  bottom: 3px;
+  cursor: pointer;
+  z-index: 0;
+  padding: 4px;
+  position: absolute;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .localDatepickerContainer .datePickerIcon .ui-datepicker-trigger {
+  position: relative;
+  opacity: 0;
+  margin-left: 5px;
+  z-index: 125;
+  cursor: pointer;
+  padding: 5px;
+  bottom: 2px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm {
+  padding-bottom: 20px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm label {
+  text-align: left;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm label.requiredInput::after {
+  content: "*";
+  color: #c77070;
+  position: relative;
+  top: 3px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm .form-group {
+  margin-bottom: 5px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm .pages-inline {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  margin-top: 5px;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm .pages-inline .form-group input {
+  width: 100%;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight .extendedForm .pages-inline .form-group label {
+  margin-bottom: 5px;
+}
+@media only screen and (max-width: 767px) {
+  html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body {
+    -webkit-flex-direction: column;
+    flex-direction: column;
+  }
+  html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfLeft {
+    padding: 0px;
+    height: 50%;
+    display: none;
+  }
+  html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-body .halfRight {
+    height: 100%;
+  }
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-footer .btn {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .panel-footer .btn:last-of-type {
+  margin-right: 0;
+}
+html body .featherlight.lpiResourceModal .featherlight-content .featherlight-inner .panel.panel-primary .featherlight-close-icon.featherlight-close {
+  right: 0px;
+  top: 3px;
+  line-height: 26px;
+  width: 26px;
+}
+
+html body .featherlight.resourceHelpModal .featherlight-content {
+  padding: 0px;
+  background: transparent;
+}
+html body .featherlight.resourceHelpModal .featherlight-content .panel.panel-primary .panel-body {
+  padding: 15px;
+}
+html body .featherlight.resourceHelpModal .featherlight-content .panel.panel-primary .panel-body .userEmail {
+  font-weight: bold;
+}
+html body .featherlight.resourceHelpModal .featherlight-content .featherlight-close-icon.featherlight-close {
+  right: 0px;
+  top: 3px;
+  line-height: 26px;
+  width: 26px;
+}
+
+@media only screen and (max-width: 767px) {
+  html body .form-datepicker {
+    max-width: calc(100% - 31px);
+    display: inline;
+  }
+}

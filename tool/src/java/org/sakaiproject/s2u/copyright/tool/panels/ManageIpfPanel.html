@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+    <body>
+        <wicket:panel>
+            <div id="resourceModal" class="resoruceModal">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span>
+                                <wicket:message key="modal.manage.header.title">
+                                    [File processing]
+                                </wicket:message>
+                            </span>
+                            <span class="processingState">
+                                <wicket:message key="modal.manage.state">
+                                    [State]
+                                </wicket:message>
+                                <span wicket:id="stateLbl">
+                                    [STATE]
+                                </span>
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="halfLeft hidden-xs col-sm-6">
+                            <iframe wicket:id="docViewer" width="100%" height="100%" style="margin-top: 0px;">
+                                [IFRAME HOLDING VIEWER.JS]
+                            </iframe>
+                            <div wicket:id="notSupported" class="notSupported">
+                                <div class="downloadFileCentered text-center bg-warning">
+                                    <img wicket:id="unavaliableIcon"></img>
+                                    <h5>Preview not avaliable for this type of file</h5>
+                                    <h5>Download for preview</h5>
+                                    <button wicket:id="downloadFileButton">Download file</button>
+                                </div>
+                            </div>
+                            <div wicket:id="htmlDisplay" class="plainPreview">
+                                <div wicket:id="previewHtml" class="previewHtml"></div>
+                            </div>
+                        </div>
+
+                        <div class="halfRight col-xs-12 col-sm-6" wicket:id="halfRight">
+
+                            <div class="col-xs-12 file-info-header">
+                                <div class="col-xs-12 col-md-6 file-text-header">
+                                    <label class="modal-bold">
+                                        <wicket:message key="modal.manage.filename">[Filename]</wicket:message>
+                                    </label>
+                                    <span class="word-break" wicket:id="fileNameLbl">[FILENAME]</span>
+                                </div>
+                                <div class="col-xs-12 col-md-6 file-text-header">
+                                    <label class="modal-bold ml-auto">
+                                        <wicket:message key="modal.manage.context">[context]</wicket:message>
+                                    </label>
+                                    <span class="word-break" wicket:id="contextLbl">[CONTEXT]</span>
+                                </div>
+                            </div>
+
+                            <div class="clearfix"></div>
+
+                            <!-- Tab panes -->
+                            <form wicket:id="licenseForm" class="licenseForm">
+                                <div class="col-xs-12">
+                                    <div class="radioChoices" wicket:id="radioChoices">
+                                        <div wicket:id="choices" class="choices">
+                                            <div class="radio">
+                                                <label wicket:for="radio">
+                                                    <input wicket:id="radio" class="radioProperty" type="radio"/>
+                                                    <span wicket:id="type"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div wicket:id="choiceDescription" class="alert alert-warning" role="alert">
+                                        [CHOICE DESCRIPTION]
+                                    </div>
+                                    <div wicket:id="managePanelFeedback">feedbackmessages will be put here</div>
+                                </div>
+                                <div wicket:id="modalForm" class="modalForm form-horizontal">
+                                    <div class="localDatepickerContainer col-xs-12">
+                                        <div class="inlineDateContainer">
+                                            <div wicket:id="datePickerContainer" id="datePickerContainer" class="datePickerIcon form-inline">
+                                                <div>
+                                                    <label for="licenseDatepicker">
+                                                        <wicket:message key="modal.manage.end.of.license">
+                                                            [END OF LICENSE]
+                                                        </wicket:message>
+                                                    </label>
+                                                </div>
+                                                <input wicket:id="licenseEnd" type="text" id="licenseDatepicker" class="form-control form-datepicker"/>
+                                            </div>
+                                            <div wicket:id="perpetualContainer" class="perpetualCheckbox">
+                                                <label>
+                                                    <wicket:message key="modal.manage.perpetual.license">
+                                                        [PERPETUAL]
+                                                    </wicket:message>
+                                                    <input wicket:id="perpetualLicense" id="licenseCheckbox" type="checkbox"/>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div wicket:id="extendedForm" class="extendedForm">
+                                    <div class="form-group clearfix">
+                                        <div class="col-xs-12">
+                                            <label wicket:for="title" class="control-label">
+                                                <wicket:message key="modal.manage.title">
+                                                    [TITLE]
+                                                </wicket:message>
+                                            </label>
+                                            <input wicket:id="title" type="text" class="form-control" wicket:message="placeholder:modal.manage.title.ph"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div class="col-xs-12">
+                                            <label wicket:for="identification" class="control-label requiredInput">
+                                                <wicket:message key="modal.manage.identification">
+                                                    [IDENTIFICATION]
+                                                </wicket:message>
+                                            </label>
+                                            <input wicket:id="identification" id="identification" type="text" class="form-control" wicket:message="placeholder:modal.manage.identification.ph" required="required" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div class="col-xs-12">
+                                            <label wicket:for="author" class="control-label">
+                                                <wicket:message key="modal.manage.author">
+                                                    [AUTHOR]
+                                                </wicket:message>
+                                            </label>
+                                            <input wicket:id="author" type="text" class="form-control" wicket:message="placeholder:modal.manage.author.ph"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div wicket:id="licenseContainer" class="col-xs-12">
+                                            <label wicket:for="license" class="control-label">
+                                                <wicket:message key="modal.manage.license">
+                                                    [LICENSE]
+                                                </wicket:message>
+                                            </label>
+                                            <input wicket:id="license" type="text" class="form-control" wicket:message="placeholder:modal.manage.license.ph"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div class="col-xs-12">
+                                            <label wicket:for="publisher" class="control-label">
+                                                <wicket:message key="modal.manage.publisher">
+                                                    [PUBLISHER]
+                                                </wicket:message>
+                                            </label>
+                                            <input wicket:id="publisher" type="text" class="form-control" wicket:message="placeholder:modal.manage.publisher.ph"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-inline form-group pages-inline col-xs-12 clearfix">
+                                        <div class="row">
+                                            <div class="form-group col-xs-6">
+                                                <label wicket:for="pages" class="control-label">
+                                                    <wicket:message key="modal.manage.pages.used">
+                                                        [PAGS. USED]
+                                                    </wicket:message>
+                                                </label>
+                                                <input wicket:id="pages" id="pages" type="text" class="form-control" wicket:message="placeholder:modal.manage.pages.used.ph"/>
+                                            </div>
+                                            <div class="form-group col-xs-6">
+                                                <label wicket:for="totalPages" class="control-label">
+                                                    <wicket:message key="modal.manage.pages.total">
+                                                        [TOTAL PAGS.]
+                                                    </wicket:message>
+                                                </label>
+                                                <input wicket:id="totalPages" id="totalPages" type="text" class="form-control" wicket:message="placeholder:modal.manage.pages.total.ph"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div class="col-xs-12">
+                                            <label wicket:for="comments" class="control-label">
+                                                <wicket:message key="modal.manage.observations">
+                                                    [OBSERVATIONS]
+                                                </wicket:message>
+                                            </label>
+                                            <textarea wicket:id="comments" class="form-control" rows="5" wicket:message="placeholder:modal.manage.observations.ph"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <input wicket:id="manageSubmitBtn" id="manageSubmitBtn" type="button" class="btn btn-primary" wicket:message="value:modal.manage.save"/>
+                            <input type="button" class="btn btn-primary" onclick="$.featherlight.close()" wicket:message="value:modal.manage.cancel"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </wicket:panel>
+    </body>
+</html>

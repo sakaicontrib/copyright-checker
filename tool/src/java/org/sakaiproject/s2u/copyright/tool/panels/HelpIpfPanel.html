@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+    <body>
+        <wicket:panel>
+            <div id="helpModal" class="resoruceModal">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span>
+                                <wicket:message key="modal.help.title">[Help]</wicket:message>
+                            </span>
+                        </h3>
+                    </div>
+                    <form wicket:id="supportForm" id="helpModalForm">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <p>
+                                    <wicket:message key="modal.help.message">
+                                        [IP Specialist]
+                                    </wicket:message>
+                                </p>
+                                <p>
+                                    <wicket:message key="modal.help.message.response">
+                                        [You will get an email at]
+                                        <span wicket:id="userEmail" class="userEmail">
+                                            [EMAIL]
+                                        </span>
+                                    </wicket:message>
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <label for="fileName">
+                                    <wicket:message key="modal.help.filename">[Filename]</wicket:message>
+                                </label>
+                                <input wicket:id="fileName" type="text" class="form-control" readonly disabled style="cursor:default"/>
+                            </div>
+                            <div class="form-group">
+                                <label for="question">
+                                    <wicket:message key="modal.help.question">[Question]</wicket:message>
+                                </label>
+                                <textarea wicket:id="helpContent" class="form-control" rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="panel-footer clearfix">
+                            <div class="pull-right">
+                                <input wicket:id="submitSupportBtn" type="button" class="btn btn-primary" wicket:message="value:modal.help.submit"/>
+                                <input type="button" class="btn btn-primary" onclick="$.featherlight.close()" wicket:message="value:modal.help.cancel"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </wicket:panel>
+    </body>
+</html>

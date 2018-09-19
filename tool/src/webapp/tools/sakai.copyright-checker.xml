@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<registration>
+    <tool id="sakai.copyright-checker"
+        title="Copyright Checker"
+        description="Tool to verify and declare the copyright status of an uploaded resource.">
+
+        <category name="myworkspace" />
+
+    </tool>
+</registration>
