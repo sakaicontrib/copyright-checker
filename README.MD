@@ -1,5 +1,7 @@
 # Copyright Checker
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/692bfd6cdc6649e589adf8e1bc298b45)](https://app.codacy.com/app/mpellicer/copyright-checker?utm_source=github.com&utm_medium=referral&utm_content=mpellicer/copyright-checker&utm_campaign=Badge_Grade_Settings)
+
 The copyright checker allows users to declare the copyright status of the different resources uploaded to Sakai. Know the copyright status of all the resources is very important for the institutions to negotiate with the IP entities.
 
 Every time an instructor uploads a file, the instructor will be informed via mail/notification that should declare the copyright status of the item, if the instructor doesn't declare the status after some period, the content will be hidden for regular users.
