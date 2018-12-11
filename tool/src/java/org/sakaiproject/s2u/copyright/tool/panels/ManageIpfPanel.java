@@ -303,19 +303,20 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                         pages.getDefaultModel(),
                         totalPages.getDefaultModel(),
                         getRequest().getRequestParameters().getParameterValue("date_ISO8601").toString(""),
-                        dateFieldValue
+                        dateFieldValue,
+                        file.getPerpetual()
                 );
-
+                
                 if (validator.validate()) {
                     Date modifiedDate = new Date();
                     file.setProperty((int) radioChoices.getDefaultModelObject());
 
-                    if (file.getPerpetual() !=  null && !file.getPerpetual()) {
-                        String dateUnformatted = RequestCycle.get().getRequest().getPostParameters().getParameterValue("date_ISO8601").toString();
-                        Date dateFormatted = parseISODate(dateUnformatted);
-                        file.setLicenseEndTime(dateFormatted);
-                    }
-
+                if (file.getPerpetual() !=  null && !file.getPerpetual()) {
+                    String dateUnformatted = RequestCycle.get().getRequest().getPostParameters().getParameterValue("date_ISO8601").toString();
+                    Date dateFormatted = parseISODate(dateUnformatted);
+                    file.setLicenseEndTime(dateFormatted);
+                }
+                
                     switch (file.getProperty()) {
                         case IntellectualPropertyFileProperty.NONE:
                             file.setState(IntellectualPropertyFileState.OK);

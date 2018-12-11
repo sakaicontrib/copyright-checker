@@ -30,6 +30,7 @@ public class IntellectualPropertyFileValidator {
     private final IModel totalPages;
     private final String licenseISO;
     private final String licenseField;
+    private final Boolean perpetualLicense;
 
     private boolean valid = true;
     private static  DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -70,7 +71,7 @@ public class IntellectualPropertyFileValidator {
     public boolean checkIdentification() {
         if (StringUtils.isBlank((String) identification.getObject())) {
             feedback.error(new ResourceModel("validation.identification").getObject());
-            target.appendJavaScript("markInputError('datePickerContainer');");
+            target.appendJavaScript("markInputError('identification');");
             this.valid = false;
         }
         return this.valid;
@@ -84,19 +85,21 @@ public class IntellectualPropertyFileValidator {
      */
     public boolean checkLicenseEnd(String licenseEnd, boolean checkBefore) {
         Date licenseDate;
-        if(licenseField != null && !licenseField.isEmpty()){
-            if (licenseEnd != null && !licenseEnd.isEmpty()) {
-                licenseDate = parseISODate(licenseEnd);
-                if (checkBefore && licenseDate != null && licenseDate.before(new Date())) {
-                    feedback.error(new ResourceModel("validation.licenseEnd").getObject());
-                    target.appendJavaScript("markInputError('datePickerContainer');");
-                    this.valid = false;
+        if(perpetualLicense != null && perpetualLicense != true){            
+            if(licenseField != null && !licenseField.isEmpty()){
+                if (licenseEnd != null && !licenseEnd.isEmpty()) {
+                    licenseDate = parseISODate(licenseEnd);
+                    if (checkBefore && licenseDate != null && licenseDate.before(new Date())) {
+                        feedback.error(new ResourceModel("validation.licenseEnd").getObject());
+                        target.appendJavaScript("markInputError('datePickerContainer');");
+                        this.valid = false;
+                    }
                 }
+            }else {
+                feedback.error(new ResourceModel("validation.licenseEnd.null").getObject());
+                target.appendJavaScript("markInputError('datePickerContainer');");
+                this.valid = false;
             }
-        }else {
-            feedback.error(new ResourceModel("validation.licenseEnd.null").getObject());
-            target.appendJavaScript("markInputError('datePickerContainer');");
-            this.valid = false;
         }
         return this.valid;
     }
