@@ -375,7 +375,7 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
         super.renderHead(response);
         response.render(JavaScriptHeaderItem.forUrl("/copyright-checker-tool/js/documentManagement.js"));
         response.render(JavaScriptHeaderItem.forUrl("/copyright-checker-tool/js/manageLpiPanel.js"));
-        response.render(JavaScriptHeaderItem.forUrl("/library/webjars/jquery-ui/1.11.3/jquery-ui.min.js"));
+        response.render(JavaScriptHeaderItem.forUrl("/library/webjars/jquery-ui/1.12.1/jquery-ui.min.js"));
         response.render(JavaScriptHeaderItem.forUrl("/library/js/lang-datepicker/lang-datepicker.js"));
     }
 

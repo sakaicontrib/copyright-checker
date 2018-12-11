@@ -1,7 +1,6 @@
 package org.sakaiproject.s2u.copyright.dao.impl;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -16,8 +15,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate4.HibernateCallback;
+import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
 
 import org.sakaiproject.s2u.copyright.dao.CopyrightCheckerDao;
 import org.sakaiproject.s2u.copyright.model.IntellectualPropertyFile;
@@ -76,7 +75,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     public Integer countIntellectualPropertyFilesByUserId(String userId) {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 if(StringUtils.isNotEmpty(userId)) {
                     crit.add(Restrictions.eq(USER_ID, userId));
@@ -100,7 +99,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     private List<IntellectualPropertyFile> findFilesByCriteria(String userId, Integer state){
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 if (StringUtils.isNotEmpty(userId)) {
                     crit.add(Restrictions.eq(USER_ID, userId));
@@ -135,7 +134,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     public boolean existsIntellectualPropertyFileById(Long id) {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 crit.add(Restrictions.eq(ID, id));
                 return crit.setProjection(Projections.rowCount()).uniqueResult();
@@ -165,7 +164,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     public List<IntellectualPropertyFile> getPendingFiles(int page, int count, String search) {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 crit.setFirstResult((count*page)-count);
                 crit.setMaxResults(count);
@@ -187,7 +186,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     public Integer countPendingFiles(String search) {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 if (StringUtils.isNotEmpty(search)) {
                     crit.add(Restrictions.or(Restrictions.like(AUTHOR, search, MatchMode.ANYWHERE), Restrictions.like(TITLE, search, MatchMode.ANYWHERE)));
@@ -206,7 +205,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     @SuppressWarnings("unchecked")
     public List<IntellectualPropertyFile> getAuditableFiles(int page, int count) {
         HibernateCallback hcb = new HibernateCallback() {
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 crit.setFirstResult((count*page)-count);
                 crit.setMaxResults(count);
@@ -229,7 +228,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     public Integer countAuditableFiles() {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 crit.add(Restrictions.ne(STATE, IntellectualPropertyFileState.NONE));
                 crit.add(Restrictions.ne(STATE, IntellectualPropertyFileState.DELETED));
@@ -245,7 +244,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
     private IntellectualPropertyFile findIntellectualPropertyFileByCriteria(Long id, String fileId) {
         HibernateCallback hcb = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            public Object doInHibernate(Session session) throws HibernateException {
                 Criteria crit = session.createCriteria(IntellectualPropertyFile.class);
                 if(id != null) {
                     crit.add(Restrictions.eq(ID, id));
@@ -313,7 +312,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
             }
             HibernateCallback hcb = new HibernateCallback() {
                 @Override
-                public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                public Object doInHibernate(Session session) throws HibernateException {
                     session.delete(l);
                     return null;
                 }
@@ -326,7 +325,7 @@ public class CopyrightCheckerDaoImpl extends HibernateDaoSupport implements Copy
         if (lfd != null) {
             HibernateCallback hcb = new HibernateCallback() {
                 @Override
-                public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                public Object doInHibernate(Session session) throws HibernateException {
                     session.delete(lfd);
                     return null;
                 }
