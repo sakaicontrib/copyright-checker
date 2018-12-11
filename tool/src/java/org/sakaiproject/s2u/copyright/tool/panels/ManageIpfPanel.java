@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -300,22 +301,21 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                         managePanelFeedback,
                         radioChoices.getDefaultModel(),
                         identification.getDefaultModel(),
-                        pages.getDefaultModel(),
-                        totalPages.getDefaultModel(),
                         getRequest().getRequestParameters().getParameterValue("date_ISO8601").toString(""),
-                        dateFieldValue
+                        dateFieldValue,
+                        file.getPerpetual()
                 );
-
+                
                 if (validator.validate()) {
                     Date modifiedDate = new Date();
                     file.setProperty((int) radioChoices.getDefaultModelObject());
 
-                    if (file.getPerpetual() !=  null && !file.getPerpetual()) {
-                        String dateUnformatted = RequestCycle.get().getRequest().getPostParameters().getParameterValue("date_ISO8601").toString();
-                        Date dateFormatted = parseISODate(dateUnformatted);
-                        file.setLicenseEndTime(dateFormatted);
-                    }
-
+                if (file.getPerpetual() !=  null && !file.getPerpetual()) {
+                    String dateUnformatted = RequestCycle.get().getRequest().getPostParameters().getParameterValue("date_ISO8601").toString();
+                    Date dateFormatted = parseISODate(dateUnformatted);
+                    file.setLicenseEndTime(dateFormatted);
+                }
+                
                     switch (file.getProperty()) {
                         case IntellectualPropertyFileProperty.NONE:
                             file.setState(IntellectualPropertyFileState.OK);
@@ -354,8 +354,6 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                         try {
                             if(sakaiProxy.existsIpPopup(sakaiProxy.getUserEid(currentUserId))){
                                 sakaiProxy.removeIpPopup(sakaiProxy.getUserEid(currentUserId));
-                            }else{
-                                log.warn("Coudn't find a popup for the user: "+currentUserId);
                             }
                         } catch (Exception ex) {
                             log.error("Error executing - removeIpPopup() : "+ex);
@@ -493,7 +491,7 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
     public Date parseISODate(final String inputDate) {
         Date convertedDate = null;
 
-        if(inputDate != null && !inputDate.isEmpty()){
+        if(StringUtils.isNotEmpty(inputDate)){
             try {
                 LocalDateTime ldt = LocalDateTime.parse(inputDate, isoFormatter);
                 convertedDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
