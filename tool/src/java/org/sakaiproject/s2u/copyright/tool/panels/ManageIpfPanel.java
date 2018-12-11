@@ -328,6 +328,7 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                         case IntellectualPropertyFileProperty.TEACHERS:
                         case IntellectualPropertyFileProperty.UNIVERSITY:
                         case IntellectualPropertyFileProperty.PUBLIC_DOMAIN:
+                        case IntellectualPropertyFileProperty.MINE:
                             file.setState(IntellectualPropertyFileState.OK);
                             file.setType(IntellectualPropertyFileType.PRINTED_OR_PRINTABLE);
                             break;
@@ -346,6 +347,20 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                     }
 
                     copyrightCheckerService.saveIntellectualPropertyFile(file);
+
+                    String currentUserId = sakaiProxy.getCurrentUserId();
+                    List<IntellectualPropertyFile> pendings = copyrightCheckerService.findIntellectualPropertyFilesByUserIdAndState(currentUserId, IntellectualPropertyFileState.NONE);
+                    if(pendings.isEmpty() || (pendings.size()==1 && pendings.get(0).getId() == file.getId())){
+                        try {
+                            if(sakaiProxy.existsIpPopup(sakaiProxy.getUserEid(currentUserId))){
+                                sakaiProxy.removeIpPopup(sakaiProxy.getUserEid(currentUserId));
+                            }else{
+                                log.warn("Coudn't find a popup for the user: "+currentUserId);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Error executing - removeIpPopup() : "+ex);
+                        }
+                    }
 
                     if(originalState == IntellectualPropertyFileStatus.NOT_AUTHORIZED &&
                         file.getState() != IntellectualPropertyFileStatus.NOT_AUTHORIZED && 
@@ -478,11 +493,13 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
     public Date parseISODate(final String inputDate) {
         Date convertedDate = null;
 
-        try {
-            LocalDateTime ldt = LocalDateTime.parse(inputDate, isoFormatter);
-            convertedDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        if(inputDate != null && !inputDate.isEmpty()){
+            try {
+                LocalDateTime ldt = LocalDateTime.parse(inputDate, isoFormatter);
+                convertedDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
 
         return convertedDate;
