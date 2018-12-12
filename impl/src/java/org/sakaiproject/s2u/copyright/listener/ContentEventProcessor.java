@@ -260,7 +260,7 @@ public class ContentEventProcessor implements EventProcessor {
 
             //Create a PA system popup for that user
             try{
-                sakaiProxy.createIpPopup(eventUserEid);
+                sakaiProxy.createIpPopup(eventUserEid, false);
             } catch(Exception ex) {
                 log.error("Error creating the IP popup of the user {}.", eventUserEid, ex);
             }

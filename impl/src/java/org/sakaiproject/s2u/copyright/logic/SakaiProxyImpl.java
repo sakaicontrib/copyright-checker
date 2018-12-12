@@ -368,7 +368,7 @@ public class SakaiProxyImpl implements SakaiProxy {
      * {@inheritDoc}
      */
     @Override
-    public void createIpPopup(String userEid) throws Exception{
+    public void createIpPopup(String userEid, boolean hiddenFiles) throws Exception{
         //Popup assigned to the userEid
         List<String> assignToUsers = Arrays.asList(userEid);
 
@@ -388,7 +388,7 @@ public class SakaiProxyImpl implements SakaiProxy {
         ResourceLoader resourceLoader = new ResourceLoader("messages");
         resourceLoader.setContextLocale(resourceLoader.getLocale(userDirectoryService.getUserId(userEid)));
         String popupTitle = resourceLoader.getString("ip.popup.title");
-        String popupContent = resourceLoader.getFormattedMessage("ip.popup.content", String.valueOf(popupDuration));
+        String popupContent = resourceLoader.getFormattedMessage(hiddenFiles ? "ip.popup.content.hidden" : "ip.popup.content", String.valueOf(popupDuration));
         String popupTemplateContent = String.format(TEMPLATE_IP_POPUP_CONTENT, popupTitle, popupContent);
         InputStream targetStream = new ByteArrayInputStream(popupTemplateContent.getBytes());
         TemplateStream templateStream = new TemplateStream(targetStream, popupTemplateContent.length());
