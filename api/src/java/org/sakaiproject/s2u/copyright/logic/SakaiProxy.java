@@ -170,9 +170,10 @@ public interface SakaiProxy {
     /**
      * Creates a new IP popup for the user
      * @param userEid the external user id
+     * @param hiddenFiles notify if there are hidden files, the message should inform that case.
      * @throws java.lang.Exception if there is a problem to create the popup
      */
-    public void createIpPopup(String userEid) throws Exception;
+    public void createIpPopup(String userEid, boolean hiddenFiles) throws Exception;
 
     /**
      * Removes the IP popup for the user
