@@ -84,7 +84,7 @@ public class IntellectualPropertyFileValidator {
     public boolean checkLicenseEnd(String licenseISO, boolean checkBefore) {
         Date licenseDate;
         if(perpetualLicense != null && perpetualLicense == false){            
-            if(StringUtils.isNotBlank(licenseFieldText) && StringUtils.isNotBlank(licenseFieldText)){
+            if(StringUtils.isNotEmpty(licenseFieldText) && StringUtils.isNotEmpty(licenseISO)){
                 licenseDate = parseISODate(licenseISO);
                 if(checkBefore && licenseDate != null && licenseDate.before(new Date())) {
                     feedback.error(new ResourceModel("validation.licenseEnd").getObject());
