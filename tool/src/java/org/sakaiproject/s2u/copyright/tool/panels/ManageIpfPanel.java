@@ -491,7 +491,7 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
     public Date parseISODate(final String inputDate) {
         Date convertedDate = null;
 
-        if(StringUtils.isNotBlank(inputDate)){
+        if(StringUtils.isNotEmpty(inputDate)){
             try {
                 LocalDateTime ldt = LocalDateTime.parse(inputDate, isoFormatter);
                 convertedDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
