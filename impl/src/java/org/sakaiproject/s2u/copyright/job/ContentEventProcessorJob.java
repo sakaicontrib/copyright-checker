@@ -48,10 +48,10 @@ public class ContentEventProcessorJob implements Job {
         files.addAll(copyrightCheckerService.findIntellectualPropertyFilesByState(IntellectualPropertyFileState.NONE));
         files.addAll(copyrightCheckerService.findIntellectualPropertyFilesByState(IntellectualPropertyFileState.GT10PERM));
 
-        for(IntellectualPropertyFile IntellectualPropertyFile : files) {
-            Date IntellectualPropertyFileDate = IntellectualPropertyFile.getModified();
-            if(IntellectualPropertyFileDate.before(hideDate)){
-                String resourceId = IntellectualPropertyFile.getFileId();
+        for(IntellectualPropertyFile intellectualPropertyFile : files) {
+            Date intellectualPropertyFileDate = intellectualPropertyFile.getModified();
+            if(intellectualPropertyFileDate.before(hideDate)){
+                String resourceId = intellectualPropertyFile.getFileId();
                 log.info("The file {} modified date is going to be hidden.", resourceId);
                 boolean hidden = sakaiProxy.setContentResourceVisibility(resourceId, false);
                 if (!hidden) {
@@ -60,9 +60,11 @@ public class ContentEventProcessorJob implements Job {
                 } else {
                     success++;
                     log.info("File {} hidden successfully.", resourceId);
-                    IntellectualPropertyFile.setState(IntellectualPropertyFileState.DENIED);
-                    boolean persisted = copyrightCheckerService.saveIntellectualPropertyFile(IntellectualPropertyFile);
+                    intellectualPropertyFile.setState(IntellectualPropertyFileState.DENIED);
+                    boolean persisted = copyrightCheckerService.saveIntellectualPropertyFile(intellectualPropertyFile);
                     log.info("IP File {} persisted? {}.", resourceId, persisted);
+                    //Manage the IP popup
+                    handleIpPopup(sakaiProxy.getUserEid(intellectualPropertyFile.getUserId()));
                 }
             }
         }
@@ -78,4 +80,25 @@ public class ContentEventProcessorJob implements Job {
         //Invalidate the session
         sakaiProxy.invalidateCurrentSession();
     }
+
+    private void handleIpPopup(String userEid) {
+        if(sakaiProxy.popupEnabled()) {
+            if(sakaiProxy.existsIpPopup(userEid)) {
+                try {
+                    //Remove the existing pa system popup for that user.
+                    sakaiProxy.removeIpPopup(userEid);
+                } catch(Exception ex) {
+                    log.error("Error removing the IP popup of the user {}.", userEid, ex);
+                }
+            }
+
+            //Create a PA system popup for that user
+            try{
+                sakaiProxy.createIpPopup(userEid, true);
+            } catch(Exception ex) {
+                log.error("Error creating the IP popup of the user {}.", userEid, ex);
+            }
+        }
+    }
+
 }
