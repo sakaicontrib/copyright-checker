@@ -53,15 +53,31 @@ public class ContentEventProcessor implements EventProcessor {
             return;
         }
 
+        //Get the userEid associated to the event
+        String eventUserEid = sakaiProxy.getUserEid(userId);
+        
+        ContentResource contentResource = null;
+        if(!ContentHostingService.EVENT_RESOURCE_REMOVE.equals(eventKey)) {
+            contentResource = validateContentResourceEvent(eventResource, siteId, userId);
+
+            if(contentResource == null) {
+                //validateContentResourceEvent has enough error logging to figure out the problem.
+                return;
+            }
+        }
+
         switch(eventKey) {
+            case ContentHostingService.EVENT_RESOURCE_ADD:
+                handleNewIpFile(contentResource, siteId, eventUserEid);
+                break;
             case ContentHostingService.EVENT_RESOURCE_UPD_NEW_VERSION:
-                handleIpFile(event);
+                handleIpFileNewVersion(contentResource, siteId, eventUserEid);
                 break;
             case ContentHostingService.EVENT_RESOURCE_UPD_VISIBILITY:
-                handleIpFile(event);
+                handleIpFileVisibility(contentResource, siteId, eventUserEid);
                 break;
             case ContentHostingService.EVENT_RESOURCE_REMOVE:
-                handleRemovedIpFile(event);
+                handleRemovedIpFile(eventResource);
                 break;
             default:
                 log.error("Event {} not supported.", eventKey);
@@ -70,146 +86,183 @@ public class ContentEventProcessor implements EventProcessor {
         log.debug("The event {} has been processed successfully.", event);
     }
 
-    private void handleIpFile(Event event) {
-        //Get all the resource information from the event.
-        String eventKey = event.getEvent();
-        String eventResource = event.getResource();
-        String siteId = event.getContext();
-        String userId = event.getUserId();
-        //Get the userEid for some purposes like PA system.
-        String eventUserEid = sakaiProxy.getUserEid(userId);
+    private void handleIpFileVisibility(ContentResource contentResource, String siteId, String eventUserEid) {
+        String resourceId = contentResource.getId();
+        ResourceProperties contentResourceProperties = contentResource.getProperties();
+        String associatedIpFileId = contentResourceProperties.getProperty(SakaiProxy.CONTENT_RESOURCE_ASSOC_IP_FILE_PROP);
 
+        if(StringUtils.isEmpty(associatedIpFileId)) {
+            //The file was created hidden but now is visible.
+            createNewIpFile(contentResource, siteId);
+            // Set the popup for the user and send the email notification
+            handleIpPopup(eventUserEid);
+            handleEmailNotification(eventUserEid);
+        }else {
+            //The file exists and it's visible, hide it if the status is DENIED.
+            IntellectualPropertyFile existingIpFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
+            if(existingIpFile != null && existingIpFile.getState().equals(new Integer(IntellectualPropertyFileState.DENIED))) {
+                log.debug("The resource with id {} has a denied status, hiding it.", resourceId);
+                sakaiProxy.setContentResourceVisibility(resourceId, false);
+            }else {
+                log.error("Fatal, cannot get IP file with resourceId {}.", resourceId);
+            }
+        }
+    }
+    
+    private void handleNewIpFile(ContentResource contentResource, String siteId, String eventUserEid) {
+        String resourceId = contentResource.getId();
+        ResourceProperties contentResourceProperties = contentResource.getProperties();
+
+        //Get the associatedIpFileId
+        String associatedIpFileId = contentResourceProperties.getProperty(SakaiProxy.CONTENT_RESOURCE_ASSOC_IP_FILE_PROP);
+        
+        //Create a new ip file
+        IntellectualPropertyFile newIpFile = createNewIpFile(contentResource, siteId);
+
+        if(StringUtils.isEmpty(associatedIpFileId)) {
+            // Set the popup for the user and send the email notification
+            handleIpPopup(eventUserEid);
+            handleEmailNotification(eventUserEid);
+        }else {
+            //File is moved, duplicated or imported.
+            IntellectualPropertyFile associatedIpFile = copyrightCheckerService.findIntellectualPropertyFileById(Long.valueOf(associatedIpFileId));
+
+            if(associatedIpFile != null) {
+                //Copy all the properties from the associated file
+                newIpFile.setAuthor(associatedIpFile.getAuthor());
+                newIpFile.setComments(associatedIpFile.getComments());
+                newIpFile.setDenyReason(associatedIpFile.getDenyReason());
+                newIpFile.setIdentification(associatedIpFile.getIdentification());
+                newIpFile.setPerpetual(associatedIpFile.getPerpetual());
+                newIpFile.setPages(associatedIpFile.getPages());
+                newIpFile.setType(associatedIpFile.getType());
+                newIpFile.setLicense(associatedIpFile.getLicense());
+                newIpFile.setLicenseEndTime(associatedIpFile.getLicenseEndTime());
+                newIpFile.setProperty(associatedIpFile.getProperty());
+                if(!associatedIpFile.getState().equals(new Integer(IntellectualPropertyFileState.DELETED))) {
+                    newIpFile.setState(associatedIpFile.getState());
+                }
+                newIpFile.setPublisher(associatedIpFile.getPublisher());
+                newIpFile.setRightsEntity(associatedIpFile.getRightsEntity());
+                newIpFile.setTotalPages(associatedIpFile.getTotalPages());
+                copyrightCheckerService.saveIntellectualPropertyFile(newIpFile);
+            } else {
+                log.error("Fatal error copying IP attributes, the associated ip file with id {} not found.", associatedIpFileId);
+            }
+        }
+
+        //Notify the content resource that a new IP file has been created
+        sakaiProxy.setContentResourceProperty(resourceId, SakaiProxy.CONTENT_RESOURCE_NEW_IP_FILE_PROP, "true");
+    }
+
+    private void handleIpFileNewVersion(ContentResource contentResource, String siteId, String userEid) {
+        String resourceId = contentResource.getId();
+        ResourceProperties contentResourceProperties = contentResource.getProperties();
+        String isNewIpFile = contentResourceProperties.getProperty(SakaiProxy.CONTENT_RESOURCE_NEW_IP_FILE_PROP);
+        
+        if(StringUtils.isEmpty(isNewIpFile)) {
+            //A new version of the file has been uploaded, reset the status to not processed.
+            IntellectualPropertyFile existingIpFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
+            if(existingIpFile !=null) {
+                existingIpFile.setState(IntellectualPropertyFileState.NONE);
+                existingIpFile.setProperty(IntellectualPropertyFileProperty.NOT_PROCESSED);
+                copyrightCheckerService.saveIntellectualPropertyFile(existingIpFile);
+                // Set the popup for the user and send the email notification
+                handleIpPopup(userEid);
+                handleEmailNotification(userEid);
+            }
+        }else {
+            //Remove the notification in the resource
+            sakaiProxy.setContentResourceProperty(resourceId, SakaiProxy.CONTENT_RESOURCE_NEW_IP_FILE_PROP, null);
+        }
+    }
+
+    private void handleRemovedIpFile(String eventResource) {
+        //The event reference has this format "/content/xxxxxxxxxxxxx" where "/xxxxxxxxxxxxx" is the resourceId
+        String resourceId = StringUtils.remove(eventResource, CONTENT_ENTITY_PREFIX);
+        log.debug("Delete event detected, setting the IP file status to deleted for the resource {}.", resourceId);
+        IntellectualPropertyFile ipFiletoDelete = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
+        if(ipFiletoDelete != null) {
+            //Logic deletion instead of physical deletion
+            ipFiletoDelete.setFileId("DELETED-"+ipFiletoDelete.getFileId());
+            ipFiletoDelete.setState(IntellectualPropertyFileState.DELETED);
+            copyrightCheckerService.saveIntellectualPropertyFile(ipFiletoDelete);
+        }
+    }
+    
+    private ContentResource validateContentResourceEvent(String eventResource, String siteId, String userId) {
         //The event reference has this format "/content/xxxxxxxxxxxxx" where "/xxxxxxxxxxxxx" is the resourceId
         String resourceId = StringUtils.remove(eventResource, CONTENT_ENTITY_PREFIX);
 
         //Filter by attachment collection
         //Filter by site, site property or role
         if(filterByAttachmentCollection(resourceId) || filterBySiteOrRole(siteId, userId)) {
-            return;
+            return null;
         }
 
         log.debug("The event contains a valid resourceId with id {}, getting the resource from the service.", resourceId);
-
+        
         //Get the resource using the service, abort if the resource is not found
         ContentResource contentResource = sakaiProxy.getContentResource(resourceId);
         if(contentResource == null) {
             log.error("Unable to get the content resource with resourceId {}, aborting the process.", resourceId);
-            return;
+            return null;
         }
-
+        
         //If the resource is hidden the processor must ignore the file.
         if(contentResource.isHidden()) {
             log.debug("The resource {} is hidden and should not be processed, aborting the process.", resourceId);
-            return;
+            return null;
         }
-
+        
         //If the mimeType is not in the checker list, the processor must ignore the file.
         String contentType = contentResource.getContentType();
         if(!sakaiProxy.isCheckedMimeType(contentType)) {
             log.debug("The mimetype {} of the resource {} is not in the list of checked resources, aborting the process.", contentType, resourceId);
-            return;
+            return null;
         }
 
-        //Get the most important information of the resource
-        String propCreator;
-        String propDisplayName;
-        Date creationDate;
-        Date modifiedDate;
-        try {
-            propCreator = contentResource.getProperties().getProperty(ResourceProperties.PROP_CREATOR);
-            propDisplayName = contentResource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
-            creationDate = contentResource.getProperties().getDateProperty(ResourceProperties.PROP_CREATION_DATE);
-            modifiedDate = contentResource.getProperties().getDateProperty(ResourceProperties.PROP_MODIFIED_DATE);
-        } catch (EntityPropertyNotDefinedException | EntityPropertyTypeException e) {
-            log.error("Error getting the properties of the file {}, aborting the process. {}", resourceId, e);
-            return;
-        }
-
-        log.debug("Processing the resource {} with attributes, propCreator={} contentType={} propDisplayName={}.", resourceId, propCreator, contentType, propDisplayName);
-
-        IntellectualPropertyFile resourceIntellectualPropertyFile;
-        resourceIntellectualPropertyFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
-
-        boolean statusCopied = false;
-
-        //If the file exists, update the object with the status
-        if(resourceIntellectualPropertyFile == null) {
-            log.debug("The IP File for the resource id {} doesn't exist, creating it.", resourceId);
-            resourceIntellectualPropertyFile = new IntellectualPropertyFile();
-            resourceIntellectualPropertyFile.setFileId(resourceId);
-            resourceIntellectualPropertyFile.setCreated(creationDate);
-            resourceIntellectualPropertyFile.setContext(siteId);
-            resourceIntellectualPropertyFile.setTitle(propDisplayName);
-            resourceIntellectualPropertyFile.setState(IntellectualPropertyFileState.NONE);
-            resourceIntellectualPropertyFile.setProperty(IntellectualPropertyFileProperty.NOT_PROCESSED);
-
-            //Check a previous association, this allows us to detect duplicated and imported files.
-            String associatedIpFileId = sakaiProxy.getContentResourceProperty(resourceId, SakaiProxy.CONTENT_RESOURCE_ASSOC_IP_FILE_PROP);
-            if(StringUtils.isNotEmpty(associatedIpFileId)) {
-                log.debug("There is an associated ip file with id {}, copying the properties to {}.", associatedIpFileId, resourceId);
-                IntellectualPropertyFile associatedIpFile = copyrightCheckerService.findIntellectualPropertyFileById(Long.valueOf(associatedIpFileId));
-                //Copy the value and the status
-                if(associatedIpFile!=null && !resourceId.equals(associatedIpFile.getFileId())) {
-                    resourceIntellectualPropertyFile.setAuthor(associatedIpFile.getAuthor());
-                    resourceIntellectualPropertyFile.setComments(associatedIpFile.getComments());
-                    resourceIntellectualPropertyFile.setDenyReason(associatedIpFile.getDenyReason());
-                    resourceIntellectualPropertyFile.setIdentification(associatedIpFile.getIdentification());
-                    resourceIntellectualPropertyFile.setPerpetual(associatedIpFile.getPerpetual());
-                    resourceIntellectualPropertyFile.setPages(associatedIpFile.getPages());
-                    resourceIntellectualPropertyFile.setType(associatedIpFile.getType());
-                    resourceIntellectualPropertyFile.setLicense(associatedIpFile.getLicense());
-                    resourceIntellectualPropertyFile.setLicenseEndTime(associatedIpFile.getLicenseEndTime());
-                    resourceIntellectualPropertyFile.setProperty(associatedIpFile.getProperty());
-                    resourceIntellectualPropertyFile.setState(associatedIpFile.getState());
-                    resourceIntellectualPropertyFile.setPublisher(associatedIpFile.getPublisher());
-                    resourceIntellectualPropertyFile.setRightsEntity(associatedIpFile.getRightsEntity());
-                    resourceIntellectualPropertyFile.setTotalPages(associatedIpFile.getTotalPages());
-                    statusCopied=true;
-                }
-            }
-        }
-
-        //Update the resource
-        resourceIntellectualPropertyFile.setUserId(propCreator);
-        resourceIntellectualPropertyFile.setModified(modifiedDate);
-        resourceIntellectualPropertyFile.setEnrollments(sakaiProxy.getSiteMemberCount(siteId));
-
-        //Change the file status and the property when the file is a new version.
-        if(!statusCopied && ContentHostingService.EVENT_RESOURCE_UPD_NEW_VERSION.equals(eventKey)) {
-            resourceIntellectualPropertyFile.setState(IntellectualPropertyFileState.NONE);
-            resourceIntellectualPropertyFile.setProperty(IntellectualPropertyFileProperty.NOT_PROCESSED);
-        }
-
-        log.debug("Updating the IP File {} for the resource id {}.", resourceIntellectualPropertyFile, resourceId);
-        copyrightCheckerService.saveIntellectualPropertyFile(resourceIntellectualPropertyFile);
-
-        //Save the association to control the duplicate, import, etc
-        log.debug("Associating the IP File {} for the resource id {}.", resourceIntellectualPropertyFile.getId(), resourceId);
-        resourceIntellectualPropertyFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
-        sakaiProxy.setContentResourceProperty(resourceId, SakaiProxy.CONTENT_RESOURCE_ASSOC_IP_FILE_PROP, String.valueOf(resourceIntellectualPropertyFile.getId()));
-
-        // Set the popup for the user and send the email notification
-        if(!statusCopied) {
-            handleIpPopup(eventUserEid);
-            handleEmailNotification(eventUserEid);
-        }
+        //Return the contentResource object if everything is fine
+        return contentResource;
     }
 
-    private void handleRemovedIpFile(Event event) {
-        //Get all the resource information from the event.
-        String eventResource = event.getResource();
-        String eventKey = event.getEvent();
+    private IntellectualPropertyFile createNewIpFile(ContentResource contentResource, String siteId){
+        String resourceId = contentResource.getId();
+        ResourceProperties contentResourceProperties = contentResource.getProperties();
 
-        //The event reference has this format "/content/xxxxxxxxxxxxx" where "/xxxxxxxxxxxxx" is the resourceId
-        String resourceId = StringUtils.remove(eventResource, CONTENT_ENTITY_PREFIX);
-
-        log.debug("Detected {} event, setting the IP file status to deleted for the resource {}.", eventKey, resourceId);
-        //The file must be processed, persist the resource in the checker tables
-        IntellectualPropertyFile resourceIntellectualPropertyFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
-        if(resourceIntellectualPropertyFile != null) {
-            resourceIntellectualPropertyFile.setState(IntellectualPropertyFileState.DELETED);
-            copyrightCheckerService.saveIntellectualPropertyFile(resourceIntellectualPropertyFile);
+        //Get the most important information of the resource
+        String propCreator = contentResourceProperties.getProperty(ResourceProperties.PROP_CREATOR);
+        String propDisplayName = contentResourceProperties.getProperty(ResourceProperties.PROP_DISPLAY_NAME);
+        Date creationDate = null;
+        Date modifiedDate = null;
+        try {
+            creationDate = contentResourceProperties.getDateProperty(ResourceProperties.PROP_CREATION_DATE);
+            modifiedDate = contentResourceProperties.getDateProperty(ResourceProperties.PROP_MODIFIED_DATE);
+        } catch (EntityPropertyNotDefinedException | EntityPropertyTypeException e) {
+            log.error("Error getting the creation and modified dates of the resourceId {}.", resourceId);
+            return null;
         }
+
+        IntellectualPropertyFile newIpFile = new IntellectualPropertyFile();
+        newIpFile = new IntellectualPropertyFile();
+        newIpFile.setFileId(resourceId);
+        newIpFile.setCreated(creationDate);
+        newIpFile.setContext(siteId);
+        newIpFile.setTitle(propDisplayName);
+        newIpFile.setState(IntellectualPropertyFileState.NONE);
+        newIpFile.setProperty(IntellectualPropertyFileProperty.NOT_PROCESSED);
+        newIpFile.setUserId(propCreator);
+        newIpFile.setModified(modifiedDate);
+        newIpFile.setEnrollments(sakaiProxy.getSiteMemberCount(siteId));
+
+        log.debug("Saving the new the IP File {} for the resource id {}.", newIpFile, resourceId);
+        copyrightCheckerService.saveIntellectualPropertyFile(newIpFile);
+
+        //Save the association to control the copy, move, duplicate, import, etc
+        log.debug("Associating the IP File {} for the resource id {}.", newIpFile.getId(), resourceId);
+        newIpFile = copyrightCheckerService.findIntellectualPropertyFileByFileId(resourceId);
+        sakaiProxy.setContentResourceProperty(resourceId, SakaiProxy.CONTENT_RESOURCE_ASSOC_IP_FILE_PROP, String.valueOf(newIpFile.getId()));
+        return newIpFile;
     }
 
     private boolean filterByAttachmentCollection(String resourceId) {
@@ -247,38 +300,39 @@ public class ContentEventProcessor implements EventProcessor {
         return false;
     }
 
-    private void handleIpPopup(String eventUserEid) {
+    private void handleIpPopup(String userEid) {
         if(sakaiProxy.popupEnabled()) {
-            if(sakaiProxy.existsIpPopup(eventUserEid)) {
+            if(sakaiProxy.existsIpPopup(userEid)) {
                 try {
                     //Remove the existing pa system popup for that user.
-                    sakaiProxy.removeIpPopup(eventUserEid);
+                    sakaiProxy.removeIpPopup(userEid);
                 } catch(Exception ex) {
-                    log.error("Error removing the IP popup of the user {}.", eventUserEid, ex);
+                    log.error("Error removing the IP popup of the user {}.", userEid, ex);
                 }
             }
 
             //Create a PA system popup for that user
             try{
-                sakaiProxy.createIpPopup(eventUserEid, false);
+                sakaiProxy.createIpPopup(userEid, false);
             } catch(Exception ex) {
-                log.error("Error creating the IP popup of the user {}.", eventUserEid, ex);
+                log.error("Error creating the IP popup of the user {}.", userEid, ex);
             }
         }
     }
 
-    private void handleEmailNotification(String eventUserEid) {
+    private void handleEmailNotification(String userEid) {
         if(sakaiProxy.emailEnabled()) {
             //Send email notification to the user.
             try {
-                sakaiProxy.sendNotificationEmail(eventUserEid);
+                sakaiProxy.sendNotificationEmail(userEid);
             } catch (Exception ex) {
-                log.error("Error sending the notification email to the user {}.", eventUserEid, ex);
+                log.error("Error sending the notification email to the user {}.", userEid, ex);
             }
         }
     }
 
     public void init() {
+        this.eventProcessorLogic.registerEventProcessor(ContentHostingService.EVENT_RESOURCE_ADD, this);
         this.eventProcessorLogic.registerEventProcessor(ContentHostingService.EVENT_RESOURCE_UPD_NEW_VERSION, this);
         this.eventProcessorLogic.registerEventProcessor(ContentHostingService.EVENT_RESOURCE_UPD_VISIBILITY, this);
         this.eventProcessorLogic.registerEventProcessor(ContentHostingService.EVENT_RESOURCE_REMOVE, this);

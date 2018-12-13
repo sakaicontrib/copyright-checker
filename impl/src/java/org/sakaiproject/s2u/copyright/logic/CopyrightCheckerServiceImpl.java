@@ -5,9 +5,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Setter;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.sakaiproject.s2u.copyright.dao.CopyrightCheckerDao;
 import org.sakaiproject.s2u.copyright.model.IntellectualPropertyFile;
 import org.sakaiproject.s2u.copyright.model.IntellectualPropertyFileDoubt;
@@ -23,29 +20,13 @@ import org.sakaiproject.s2u.copyright.model.IntellectualPropertyFileStatus;
 public class CopyrightCheckerServiceImpl implements CopyrightCheckerService {
 
     @Setter private CopyrightCheckerDao dao;
-    @Setter private Cache cache;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public IntellectualPropertyFile findIntellectualPropertyFileById(long id) {
-        //check cache
-        Element element = cache.get(id);
-        if(element != null) {
-            log.debug("Fetching item from cache for: " + id);
-            return (IntellectualPropertyFile)element.getValue();
-        }
-
-        //if noIntellectualPropertyFile from cache, get from db and cache it
-        IntellectualPropertyFile l = dao.findIntellectualPropertyFileById(id);
-
-        if(l != null) {
-            log.debug("Adding item to cache for: " + id);
-            cache.put(new Element(id,l));
-        }
-
-        return l;
+        return dao.findIntellectualPropertyFileById(id);
     }
 
     /**
@@ -61,22 +42,7 @@ public class CopyrightCheckerServiceImpl implements CopyrightCheckerService {
      */
     @Override
     public IntellectualPropertyFile findIntellectualPropertyFileByFileId(String fileId) {
-        //check cache
-        Element element = cache.get(fileId);
-        if(element != null) {
-            log.debug("Fetching item from cache for: " + fileId);
-            return (IntellectualPropertyFile)element.getValue();
-        }
-
-        //if noIntellectualPropertyFile from cache, get from db and cache it
-        IntellectualPropertyFile l = dao.findIntellectualPropertyFileByFileId(fileId);
-
-        if(l != null) {
-            log.debug("Adding item to cache for: " + fileId);
-            cache.put(new Element(fileId,l));
-        }
-
-        return l;
+        return dao.findIntellectualPropertyFileByFileId(fileId);
     }
 
     /**
@@ -157,9 +123,6 @@ public class CopyrightCheckerServiceImpl implements CopyrightCheckerService {
     @Override
     public boolean saveIntellectualPropertyFile(IntellectualPropertyFile t) {
         boolean saved = dao.saveIntellectualPropertyFile(t);
-        //Invalidate the cache
-        cache.remove(t.getId());
-        cache.remove(t.getFileId());
         return saved;
     }
 
