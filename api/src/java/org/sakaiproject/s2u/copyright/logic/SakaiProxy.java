@@ -21,7 +21,7 @@ public interface SakaiProxy {
     public static final String CONFIG_EMAIL_ENABLE = "copyright.checker.email.enable";
     public static final String CONFIG_CHECKED_MIMETYPES = "copyright.checker.checked.mimetypes";
     public static final String CONFIG_SITE_CHECKER_DISABLE = "copyright.checker.disable";
-    public static final int DEFAULT_FILE_DURATION = 2;
+    public static final int DEFAULT_FILE_DURATION = 48;
     public static final String CONTENT_RESOURCE_ASSOC_IP_FILE_PROP = "cc-associated-ip-file";
     public static final String CONTENT_RESOURCE_NEW_IP_FILE_PROP = "cc-is-new-file";
 
