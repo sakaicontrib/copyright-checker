@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +66,6 @@ import org.sakaiproject.util.ResourceLoader;
 @Slf4j
 public class SakaiProxyImpl implements SakaiProxy {
 
-    public static final int CONSTANT_DAY_IN_MILLIS = 24 * 3600 * 1000;
     public static final String TEMPLATE_IP_POPUP_PREFIX = "IP-%s";
     public static final String TEMPLATE_IP_POPUP_CONTENT = "<header class=\"popup-container-header\">%s</header><section><p>%s</p></section>";
 
@@ -375,20 +373,15 @@ public class SakaiProxyImpl implements SakaiProxy {
         //Prefix to identify the IP popup, format IP-userEid
         String ipPopupPrefix = String.format(TEMPLATE_IP_POPUP_PREFIX, userEid);
 
-        //TTL of the popup, 2 days by default.
-        int popupDuration = this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION);
-        long startTime = System.currentTimeMillis();
-        long endTime = System.currentTimeMillis() + CONSTANT_DAY_IN_MILLIS * popupDuration;
-        log.debug("Creating a new IP popup, user {}, startLocalDateTime {}, endLocalDateTime {} ", userEid , Instant.ofEpochMilli(startTime), Instant.ofEpochMilli(endTime));
-
-        //Create the Popup object
-        Popup popup = Popup.create(ipPopupPrefix, startTime, endTime, false);
+        //Create the Popup object for an insane amount of time (It's not infinite but a lot of time!)
+        long INSANE_AMOUNT_OF_TIME =(long) 1000 * 3600 * 60 * 24 * 365;
+        Popup popup = Popup.create(ipPopupPrefix, System.currentTimeMillis(), System.currentTimeMillis() + INSANE_AMOUNT_OF_TIME, false);
 
         //Create the TemplateStream object that contains the message template.
         ResourceLoader resourceLoader = new ResourceLoader("messages");
         resourceLoader.setContextLocale(resourceLoader.getLocale(userDirectoryService.getUserId(userEid)));
         String popupTitle = resourceLoader.getString("ip.popup.title");
-        String popupContent = resourceLoader.getFormattedMessage(hiddenFiles ? "ip.popup.content.hidden" : "ip.popup.content", String.valueOf(popupDuration));
+        String popupContent = resourceLoader.getFormattedMessage(hiddenFiles ? "ip.popup.content.hidden" : "ip.popup.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
         String popupTemplateContent = String.format(TEMPLATE_IP_POPUP_CONTENT, popupTitle, popupContent);
         InputStream targetStream = new ByteArrayInputStream(popupTemplateContent.getBytes());
         TemplateStream templateStream = new TemplateStream(targetStream, popupTemplateContent.length());
@@ -516,9 +509,7 @@ public class SakaiProxyImpl implements SakaiProxy {
         ResourceLoader resourceLoader = new ResourceLoader("messages");
         resourceLoader.setContextLocale(resourceLoader.getLocale(userDirectoryService.getUserId(userEid)));
         String subject = resourceLoader.getString("ip.notification.mail.subject");
-        //TTL of the popup, 2 days by default.
-        int popupDuration = this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION);
-        String content = resourceLoader.getFormattedMessage("ip.notification.mail.content", String.valueOf(popupDuration));
+        String content = resourceLoader.getFormattedMessage("ip.notification.mail.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
 
         List<String> additionalHeaders = null;
         String headerToStr = null;

@@ -37,7 +37,7 @@ public class ContentEventProcessorJob implements Job {
         //Get the resource time to live in order to hide resources modified before this cut date.
         int resourceDuration = sakaiProxy.getConfigParam(SakaiProxy.CONFIG_FILE_DURATION, SakaiProxy.DEFAULT_FILE_DURATION);
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.DAY_OF_YEAR, - resourceDuration);
+        c.add(Calendar.HOUR_OF_DAY, - resourceDuration);
         Date hideDate = c.getTime();
 
         //Enable an admin session

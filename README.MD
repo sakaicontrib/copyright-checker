@@ -48,13 +48,13 @@ copyright.checker.disable=true
 
 ### Configuration in the sakai.properties file
 ```
+# (Optional) File visibility policy in hours, the file will be hidden after these number of hours.
+# Default: 48
+# copyright.checker.file.duration = 48
+
 # (Optional) Enable the PA System integration, show popups to the users about the pending copyright items.
 # Default: false
 copyright.checker.popup.enable=true
-
-# (Optional) TTL or duration of the PA System popup (in days)
-# Default: 2
-# copyright.checker.popup.duration = 2
 
 # (Optional) Enable the Email integration, send emails to the users about the pending copyright items.
 # Default: false
