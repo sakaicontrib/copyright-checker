@@ -22,7 +22,8 @@ public interface SakaiProxy {
     public static final String CONFIG_CHECKED_MIMETYPES = "copyright.checker.checked.mimetypes";
     public static final String CONFIG_SITE_CHECKER_DISABLE = "copyright.checker.disable";
     public static final int DEFAULT_FILE_DURATION = 2;
-    public static final String CONTENT_RESOURCE_ASSOC_IP_FILE_PROP = "associated-ip-file";
+    public static final String CONTENT_RESOURCE_ASSOC_IP_FILE_PROP = "cc-associated-ip-file";
+    public static final String CONTENT_RESOURCE_NEW_IP_FILE_PROP = "cc-is-new-file";
 
     /**
      * Is the current user a superUser? (anyone in admin realm)
@@ -269,14 +270,6 @@ public interface SakaiProxy {
      * @param value the new value for that property
      */
     public void setContentResourceProperty(String resourceId, String propertyKey, String value);
-
-    /**
-     * Get a content resource property value
-     * @param resourceId the resource id
-     * @param propertyKey the property key to get its value
-     * @return the property value in string
-     */
-    public String getContentResourceProperty(String resourceId, String propertyKey);
 
     /**
      * Get a session by its id

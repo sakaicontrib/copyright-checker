@@ -543,7 +543,9 @@ public class SakaiProxyImpl implements SakaiProxy {
     @Override
     public ContentResource getContentResource(String resourceId) {
         try {
-            return contentHostingService.getResource(resourceId);
+            if(!contentHostingService.isCollection(resourceId)) {
+                return contentHostingService.getResource(resourceId);
+            }
         } catch (PermissionException | IdUnusedException | TypeException e) {
             log.error("Error getting the resource {}.", resourceId, e);
         }
@@ -584,18 +586,6 @@ public class SakaiProxyImpl implements SakaiProxy {
                 TypeException e) {
             log.error("Error editing the resource {}.", resourceId, e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getContentResourceProperty(String resourceId, String propertyKey) {
-        ContentResource contentResource = this.getContentResource(resourceId);
-        if(contentResource !=null) {
-            return contentResource.getProperties().getProperty(propertyKey);
-        }
-        return null;
     }
 
     /**
