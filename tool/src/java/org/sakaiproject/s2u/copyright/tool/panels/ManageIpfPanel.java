@@ -360,8 +360,8 @@ public final class ManageIpfPanel extends Panel implements IEventSource{
                         }
                     }
 
-                    if(originalState == IntellectualPropertyFileStatus.NOT_AUTHORIZED &&
-                        file.getState() != IntellectualPropertyFileStatus.NOT_AUTHORIZED && 
+                    if(originalState == IntellectualPropertyFileState.DENIED &&
+                        file.getState() != IntellectualPropertyFileState.GT10 && 
                         file.getState() != IntellectualPropertyFileState.GT10PERM &&
                         sakaiProxy.setContentResourceVisibility(file.getFileId(), true)){
                             data.getObject().setHidden(false);
