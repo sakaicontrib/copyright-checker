@@ -50,7 +50,9 @@ import org.sakaiproject.pasystem.api.Popups;
 import org.sakaiproject.pasystem.api.TemplateStream;
 import org.sakaiproject.s2u.copyright.logic.listener.EventProcessor;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -316,6 +318,28 @@ public class SakaiProxyImpl implements SakaiProxy {
         eventTrackingService.post(eventTrackingService.newEvent(event,reference,modify));
     }
 
+    private String getWorkspaceToolLink(String userId) {
+        final String toolId = "sakai.copyright-checker";
+        String workspaceToolUrl = null;
+        String userSiteId = siteService.getUserSiteId(userId);
+
+        try{
+            Site workspaceSite = siteService.getSite(userSiteId);
+
+            for (SitePage sitePage : workspaceSite.getPages()) {
+                for(ToolConfiguration toolConfiguration : sitePage.getTools()){
+                    if (toolConfiguration.getToolId().equals(toolId)) {
+                        workspaceToolUrl = String.format("%s/site/%s/tool/%s", serverConfigurationService.getPortalUrl(), userSiteId, toolConfiguration.getId());
+                    }
+                }
+            }
+        }catch(Exception e){
+            log.error("Cannot get user site {}", userId, e);
+        }
+
+        return workspaceToolUrl;
+    }
+
     /************************************************************************
      * EVENT PROCESSOR METHODS
      ************************************************************************/
@@ -369,6 +393,8 @@ public class SakaiProxyImpl implements SakaiProxy {
     public void createIpPopup(String userEid, boolean hiddenFiles) throws Exception{
         //Popup assigned to the userEid
         List<String> assignToUsers = Arrays.asList(userEid);
+        String userId = userDirectoryService.getUserId(userEid);
+        String workspaceToolLink = this.getWorkspaceToolLink(userId);
 
         //Prefix to identify the IP popup, format IP-userEid
         String ipPopupPrefix = String.format(TEMPLATE_IP_POPUP_PREFIX, userEid);
@@ -379,9 +405,18 @@ public class SakaiProxyImpl implements SakaiProxy {
 
         //Create the TemplateStream object that contains the message template.
         ResourceLoader resourceLoader = new ResourceLoader("messages");
-        resourceLoader.setContextLocale(resourceLoader.getLocale(userDirectoryService.getUserId(userEid)));
-        String popupTitle = resourceLoader.getString("ip.popup.title");
-        String popupContent = resourceLoader.getFormattedMessage(hiddenFiles ? "ip.popup.content.hidden" : "ip.popup.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
+        resourceLoader.setContextLocale(resourceLoader.getLocale(userId));
+        String popupTitle = resourceLoader.getString("notification.subject");
+        String popupContent = resourceLoader.getFormattedMessage("notification.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
+
+        //Append more information about hidden messages
+        if(hiddenFiles){
+            popupContent = resourceLoader.getFormattedMessage("notification.content.hidden") + popupContent;
+        }
+
+        popupContent = StringUtils.isNotEmpty(workspaceToolLink) ? popupContent + resourceLoader.getFormattedMessage("notification.tool.link", workspaceToolLink)
+            : popupContent + resourceLoader.getFormattedMessage("notification.tool.link.missing");
+
         String popupTemplateContent = String.format(TEMPLATE_IP_POPUP_CONTENT, popupTitle, popupContent);
         InputStream targetStream = new ByteArrayInputStream(popupTemplateContent.getBytes());
         TemplateStream templateStream = new TemplateStream(targetStream, popupTemplateContent.length());
@@ -481,8 +516,8 @@ public class SakaiProxyImpl implements SakaiProxy {
         //Title of the notification
         ResourceLoader resourceLoader = new ResourceLoader("messages");
         resourceLoader.setContextLocale(resourceLoader.getLocale(user.getId()));
-        String subject = resourceLoader.getFormattedMessage("ip.support.mail.subject", user.getEmail());
-        String content = resourceLoader.getFormattedMessage("ip.support.mail.content", user.getDisplayName(), user.getEmail(), this.getFileContextName(siteId), this.getFileName(fileId), fileUrl, userContent);
+        String subject = resourceLoader.getFormattedMessage("support.mail.subject", user.getEmail());
+        String content = resourceLoader.getFormattedMessage("support.mail.content", user.getDisplayName(), user.getEmail(), this.getFileContextName(siteId), this.getFileName(fileId), fileUrl, userContent);
         log.debug("EMAIL CONTENT: "+content);
 
         InternetAddress[] headerTo = null;
@@ -496,6 +531,8 @@ public class SakaiProxyImpl implements SakaiProxy {
      */
     @Override
     public void sendNotificationEmail(String userEid) throws Exception{
+        String userId = userDirectoryService.getUserId(userEid);
+        String workspaceToolLink = this.getWorkspaceToolLink(userId);
         //To address
         String toStr = this.getUserEmail(userEid);
         if(StringUtils.isEmpty(toStr)) {
@@ -508,8 +545,10 @@ public class SakaiProxyImpl implements SakaiProxy {
         //Title of the notification
         ResourceLoader resourceLoader = new ResourceLoader("messages");
         resourceLoader.setContextLocale(resourceLoader.getLocale(userDirectoryService.getUserId(userEid)));
-        String subject = resourceLoader.getString("ip.notification.mail.subject");
-        String content = resourceLoader.getFormattedMessage("ip.notification.mail.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
+        String subject = resourceLoader.getString("notification.subject");
+        String content = resourceLoader.getFormattedMessage("notification.content", String.valueOf(this.getConfigParam(CONFIG_FILE_DURATION, DEFAULT_FILE_DURATION)));
+        content = StringUtils.isNotEmpty(workspaceToolLink) ? content + resourceLoader.getFormattedMessage("notification.tool.link", workspaceToolLink)
+            : content + resourceLoader.getFormattedMessage("notification.tool.link.missing");
 
         List<String> additionalHeaders = null;
         String headerToStr = null;
