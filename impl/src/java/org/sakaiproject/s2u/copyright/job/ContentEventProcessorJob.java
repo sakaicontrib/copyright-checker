@@ -60,7 +60,10 @@ public class ContentEventProcessorJob implements Job {
                 } else {
                     success++;
                     log.info("File {} hidden successfully.", resourceId);
-                    intellectualPropertyFile.setState(IntellectualPropertyFileState.DENIED);
+                    // Avoid state change on not processed files
+                    if (intellectualPropertyFile.getState() != IntellectualPropertyFileState.NONE) {
+                        intellectualPropertyFile.setState(IntellectualPropertyFileState.DENIED);
+                    }
                     boolean persisted = copyrightCheckerService.saveIntellectualPropertyFile(intellectualPropertyFile);
                     log.info("IP File {} persisted? {}.", resourceId, persisted);
                     //Manage the IP popup
